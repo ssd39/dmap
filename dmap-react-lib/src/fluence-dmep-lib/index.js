@@ -1,8 +1,12 @@
 import { Fluence, FluencePeer } from "@fluencelabs/fluence";
 import { krasnodar } from "@fluencelabs/fluence-network-environment";
 import { Multiaddr, protocols } from "multiaddr";
-import { get_external_api_multiaddr, deploy_service, set_timeout } from './fluence-media-service'
+import { get_external_api_multiaddr, deploy_service, set_timeout, image_resize } from './fluence-media-service'
 import { create, urlSource } from 'ipfs-http-client'
+
+let ipfs_rpcAddr;
+let service_host_peerid;
+let media_service_id;
 
 function decapsulateP2P(rpcAddr){
   return new Multiaddr(rpcAddr)
@@ -65,8 +69,9 @@ async function init(){
     let serviceHost = krasnodar[2];
 
     let providerClient = new FluencePeer();
-    await providerClient.start({ connectTo: serviceHost });
-    let { file , rpcAddrx} = await uploadToIPFS(providerClient, urlSource('http://localhost:3000/media_service.wasm'))
+    await providerClient.start({ connectTo: providerHost });
+    let { file , rpcAddrx} = await uploadToIPFS(providerClient, urlSource(window.location.origin+'/media_service.wasm'))
+    ipfs_rpcAddr = rpcAddrx;
     console.log(file.cid.toString())
     await Fluence.start({ connectTo: relay.multiaddr });
     console.log(
@@ -74,12 +79,17 @@ async function init(){
       Fluence.getStatus().peerId,
       Fluence.getStatus().relayPeerId,
     );
-    //let rpcAddr = await getProvider(providerClient)
-    //console.log("rpcAddr: " + rpcAddr)
+    service_host_peerid= serviceHost.peerId
     await set_timeout(serviceHost.peerId, 10);
-    await deploy_service(serviceHost.peerId, "QmP55SfLzriUebzwvnPj9Ea4cMwJemHCBD2hi4d9JdPvKU", rpcAddrx, (a1,a2)=>{
+    media_service_id = await deploy_service(serviceHost.peerId, file.cid.toString(), rpcAddrx, (a1,a2)=>{
       console.log(a1+" "+a2)
     },{ ttl: 1000000 })
 }
 
-export { getRpcAddr, init }
+async function imageResize(cid, height, width ){
+  return await image_resize(cid, height, width, ipfs_rpcAddr, service_host_peerid, media_service_id, (a1, a2)=>{
+    console.log(a1+" "+a2)
+  },{ ttl: 100000 })
+}
+
+export { getRpcAddr, init, imageResize }
