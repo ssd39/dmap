@@ -1,0 +1,25 @@
+{
+  "name": "dmep-aqua",
+  "version": "1.0.0",
+  "description": "aqua files for dmep",
+  "scripts": {
+    "compile-aqua": "aqua -m ./node_modules -i aqua -o src",
+    "prebuild": "../media-service/build.sh",
+    "build": "npm run compile-aqua && tsc && mkdir -p ../dmep-web/src/fluence-dmep-lib/fluence-media-service && cp -r ./dist/* ../dmep-web/src/fluence-dmep-lib/fluence-media-service"
+  },
+  "author": "Dwij Patel (Overclocked Brains)",
+  "license": "ISC",
+  "dependencies": {
+    "@fluencelabs/aqua-ipfs": "^0.5.5",
+    "@fluencelabs/fluence": "^0.23.1",
+    "@fluencelabs/fluence-network-environment": "1.0.13",
+    "it-all": "^1.0.5",
+    "multiaddr": "^10.0.0",
+    "uint8arrays": "^2.1.5"
+  },
+  "devDependencies": {
+      "@fluencelabs/aqua": "0.7.4-338",
+      "@fluencelabs/aqua-lib": "0.5.2",
+      "typescript": "^4.6.3"
+  }
+}

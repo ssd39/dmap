@@ -1,0 +1,4 @@
+module MediaService declares *
+
+service MediaService:
+  imageresize(path: string, height: u32, width: u32) -> []u8
